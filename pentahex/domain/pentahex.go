@@ -9,6 +9,7 @@ import (
 	"github.com/oguri257/theStudy/pentahex/utils"
 )
 
+// Tile構造体，Tileを扱う関数の定義
 type PrimTilePat struct {
 	id          int
 	coordinates utils.CellSet
@@ -284,15 +285,15 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 
 	//全てのオブジェクトとその反転の集合
 	for _, tile := range tileset {
-		if tile.id == 11 {
-			fmt.Println("a", tile.id, tile.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	fmt.Println("a", tile.id, tile.coordinates.SortedCoords())
+		// }
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
 			all_coord.Add(tile_str)
 			all_tileset = append(all_tileset, tile)
-			fmt.Println("OK Add")
+			// fmt.Println("OK Add")
 			//fmt.Printf("log at allrotate: add original %+v \n", tile.coordinates.Elements_type())
 		}
 		//反転について
@@ -301,25 +302,25 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			fmt.Println("OK Add")
+			// fmt.Println("OK Add")
 			//fmt.Printf("log at allrotate: add original-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		if tile.id == 11 {
-			fmt.Println("b", tile.id, tile_180.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	// fmt.Println("b", tile.id, tile_180.coordinates.SortedCoords())
+		// }
 	}
 
 	for _, tile := range r_tileset {
-		if tile.id == 11 {
-			fmt.Println("c", tile.id, tile.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	// fmt.Println("c", tile.id, tile.coordinates.SortedCoords())
+		// }
 		// fmt.Println(tile.id, tile.coordinates.SortedCoords())
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
 			all_coord.Add(tile_str)
 			all_tileset = append(all_tileset, tile)
-			fmt.Println("OK Add")
+			// fmt.Println("OK Add")
 			//fmt.Printf("log at allrotate: add r60 %+v \n", tile.coordinates.Elements_type())
 		}
 		//反転について
@@ -328,23 +329,23 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			fmt.Println("OK Add")
+			// fmt.Println("OK Add")
 			//fmt.Printf("log at allrotate: add r60-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		if tile.id == 11 {
-			fmt.Println("d", tile.id, tile_180.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	fmt.Println("d", tile.id, tile_180.coordinates.SortedCoords())
+		// }
 	}
 
+	// for _, tile := range rr_tileset {
+	// 	if tile.id == 11 {
+	// 		fmt.Println("aaaaa", tile.id, tile.coordinates.SortedCoords())
+	// 	}
+	// }
 	for _, tile := range rr_tileset {
-		if tile.id == 11 {
-			fmt.Println("aaaaa", tile.id, tile.coordinates.SortedCoords())
-		}
-	}
-	for _, tile := range rr_tileset {
-		if tile.id == 11 {
-			fmt.Println("e", tile.id, tile.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	fmt.Println("e", tile.id, tile.coordinates.SortedCoords())
+		// }
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
@@ -359,12 +360,12 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			fmt.Println("OK Add")
+			// fmt.Println("OK Add")
 			//fmt.Printf("log at allrotate: add r120-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		if tile.id == 11 {
-			fmt.Println("f", tile.id, tile_180.coordinates.SortedCoords())
-		}
+		// if tile.id == 11 {
+		// 	fmt.Println("f", tile.id, tile_180.coordinates.SortedCoords())
+		// }
 	}
 	// for _, i := range all_tileset {
 	// 	fmt.Println(i.id, i.coordinates.SortedCoords())

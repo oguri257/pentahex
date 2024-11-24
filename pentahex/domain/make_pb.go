@@ -9,49 +9,6 @@ import (
 	"github.com/oguri257/theStudy/pentahex/utils"
 )
 
-type TilePatSet struct {
-	elements map[*PrimTilePat]struct{}
-}
-
-// NewCellSet は新しい CellSet を作成します
-func NewTilePatSet() *TilePatSet {
-	return &TilePatSet{
-		elements: make(map[*PrimTilePat]struct{}),
-	}
-}
-
-// Add はセットに要素を追加します
-func (s *TilePatSet) Add(element *PrimTilePat) {
-	s.elements[element] = struct{}{} // 空の struct{} を使用
-}
-
-func (s *TilePatSet) Elements() []*PrimTilePat {
-	keys := make([]*PrimTilePat, 0, len(s.elements))
-	for key := range s.elements {
-		keys = append(keys, key)
-	}
-	return keys
-}
-
-// Remove はセットから要素を削除します
-func (s *TilePatSet) Remove(element *PrimTilePat) {
-	delete(s.elements, element)
-}
-
-func removeByValue(slice []*PrimTilePat, value *PrimTilePat) []*PrimTilePat {
-	for i, v := range slice {
-		if v == value {
-			return append(slice[:i], slice[i+1:]...)
-		}
-	}
-	return slice
-}
-
-type TileExp struct {
-	coeff int
-	tile  *PrimTilePat
-}
-
 // ファイル名を生成する関数
 func genFilename(progName string, opt int) string {
 	return fmt.Sprintf("%s-opt%d", progName, opt)
@@ -325,6 +282,9 @@ func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]b
 					var neibors []*PrimTilePat
 					for _, coord := range tile.borders.Elements_type() {
 						k, l := coord.X, coord.Y
+						if k < 0 || l < 0 {
+							continue
+						}
 						if !D[k][l] {
 							continue
 						}
@@ -340,6 +300,9 @@ func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]b
 							compatible := true
 							for _, coord := range tile.borders.Elements_type() {
 								x, y := coord.X, coord.Y
+								if x < 0 || y < 0 {
+									continue
+								}
 								if !D[x][y] || tile2.contains(x, y) {
 									continue
 								}

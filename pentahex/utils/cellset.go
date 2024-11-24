@@ -6,7 +6,8 @@ import (
 	"strconv"
 )
 
-// Set は整数のセットを表す構造体です
+// CellSet: 座標の集合
+// Coord:   座標
 type CellSet struct {
 	elements map[*Coord]struct{}
 }
@@ -16,6 +17,7 @@ type Coord struct {
 	Y int
 }
 
+// stringSet: string型のSet
 type StringSet struct {
 	elements map[string]struct{}
 }
@@ -153,7 +155,9 @@ func (s *StringSet) Contains(element string) bool {
 	return exists
 }
 
-// IntSet
+// ////////////////////////////////////////
+// ////// IntSet: 整数を扱うSet ////////////
+// ////////////////////////////////////////
 type IntSet struct {
 	elements map[int]struct{}
 }
