@@ -158,7 +158,6 @@ func (p *PrimTilePat) isoverlap(in *PrimTilePat) bool {
 }
 
 func (p *PrimTilePat) normalize() error {
-	//fmt.Printf("log at normalize():before %+v \n", p.coordinates.Elements_type())
 	for _, coord := range p.coordinates.Elements() {
 		coord.X = coord.X - p.xmin
 		coord.Y = coord.Y - p.ymin
@@ -166,7 +165,6 @@ func (p *PrimTilePat) normalize() error {
 			return fmt.Errorf("faild at normalize(): result in [coord < 0]")
 		}
 	}
-	//fmt.Printf("log at normalize():after %+v \n", p.coordinates.Elements_type())
 	return nil
 }
 
@@ -187,7 +185,6 @@ func (p *PrimTilePat) flip() (*PrimTilePat, error) {
 }
 
 func (p *PrimTilePat) rotate_60() (*PrimTilePat, error) {
-	//fmt.Printf("log at rotate_60():before %+v \n", p.coordinates.Elements_type())
 	rotate_coordinates := utils.NewCellSet()
 	for _, coord := range p.coordinates.Elements() {
 		x, y := coord.X, coord.Y
@@ -200,13 +197,10 @@ func (p *PrimTilePat) rotate_60() (*PrimTilePat, error) {
 		return nil, fmt.Errorf("faild at rotate_60(): by NewPrimTilePat")
 	}
 	rotate_60_p.normalize()
-	//fmt.Printf("log at rotate_60():after %+v \n", p.coordinates.Elements_type())
-	//fmt.Println(p.id, p.coordinates.SortedCoords(), rotate_60_p.coordinates.SortedCoords())
 	return rotate_60_p, nil
 }
 
 func (p *PrimTilePat) rotate_180() (*PrimTilePat, error) {
-	//fmt.Printf("log at rotate_180():before %+v \n", p.coordinates.Elements_type())
 	rotate_coordinates := utils.NewCellSet()
 	for _, coord := range p.coordinates.Elements() {
 		x, y := coord.X, coord.Y
@@ -219,7 +213,6 @@ func (p *PrimTilePat) rotate_180() (*PrimTilePat, error) {
 		return nil, fmt.Errorf("faild at rotate_180(): by NewPrimTilePat")
 	}
 	rotate_180_p.normalize()
-	//fmt.Printf("log at rotate_180(:after %+v \n", p.coordinates.Elements_type())
 
 	return rotate_180_p, nil
 }
@@ -247,10 +240,6 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		tileset = append(tileset, flip_p)
 	}
 
-	// for _, i := range tileset {
-	// 	fmt.Println(i.id, i.coordinates.SortedCoords())
-	// }
-
 	//元と反転タイルを60度回転した集合
 	for _, tile := range tileset {
 		tile_r, err := tile.rotate_60()
@@ -269,9 +258,6 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 			r_tileset = append(r_tileset, tile_r)
 		}
 	}
-	// for _, i := range r_tileset {
-	// 	fmt.Println(i.id, i.coordinates.SortedCoords())
-	// }
 
 	//元と反転タイルを120度回転した集合
 	for _, tile := range r_tileset {
@@ -291,22 +277,14 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 			rr_tileset = append(rr_tileset, tile_rr)
 		}
 	}
-	// for _, i := range rr_tileset {
-	// 	fmt.Println(i.id, i.coordinates.SortedCoords())
-	// }
 
 	//全てのオブジェクトとその反転の集合
 	for _, tile := range tileset {
-		// if tile.id == 11 {
-		// 	fmt.Println("a", tile.id, tile.coordinates.SortedCoords())
-		// }
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
 			all_coord.Add(tile_str)
 			all_tileset = append(all_tileset, tile)
-			// fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add original %+v \n", tile.coordinates.Elements_type())
 		}
 		//反転について
 		tile_180, _ := tile.rotate_180()
@@ -314,26 +292,15 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			// fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add original-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		// if tile.id == 11 {
-		// 	// fmt.Println("b", tile.id, tile_180.coordinates.SortedCoords())
-		// }
 	}
 
 	for _, tile := range r_tileset {
-		// if tile.id == 11 {
-		// 	// fmt.Println("c", tile.id, tile.coordinates.SortedCoords())
-		// }
-		// fmt.Println(tile.id, tile.coordinates.SortedCoords())
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
 			all_coord.Add(tile_str)
 			all_tileset = append(all_tileset, tile)
-			// fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add r60 %+v \n", tile.coordinates.Elements_type())
 		}
 		//反転について
 		tile_180, _ := tile.rotate_180()
@@ -341,30 +308,15 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			// fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add r60-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		// if tile.id == 11 {
-		// 	fmt.Println("d", tile.id, tile_180.coordinates.SortedCoords())
-		// }
 	}
 
-	// for _, tile := range rr_tileset {
-	// 	if tile.id == 11 {
-	// 		fmt.Println("aaaaa", tile.id, tile.coordinates.SortedCoords())
-	// 	}
-	// }
 	for _, tile := range rr_tileset {
-		// if tile.id == 11 {
-		// 	fmt.Println("e", tile.id, tile.coordinates.SortedCoords())
-		// }
 		//元のタイルについて
 		tile_str := tile.coordinates.SortedCoordsString()
 		if !all_coord.Contains(tile_str) {
 			all_coord.Add(tile_str)
 			all_tileset = append(all_tileset, tile)
-			fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add r120 %+v \n", tile.coordinates.Elements_type())
 		}
 		//反転について
 		tile_180, _ := tile.rotate_180()
@@ -372,16 +324,8 @@ func (p *PrimTilePat) All_rotate() ([]*PrimTilePat, error) {
 		if !all_coord.Contains(tile_r_str) {
 			all_coord.Add(tile_r_str)
 			all_tileset = append(all_tileset, tile_180)
-			// fmt.Println("OK Add")
-			//fmt.Printf("log at allrotate: add r120-180 %+v \n", tile.coordinates.Elements_type())
 		}
-		// if tile.id == 11 {
-		// 	fmt.Println("f", tile.id, tile_180.coordinates.SortedCoords())
-		// }
 	}
-	// for _, i := range all_tileset {
-	// 	fmt.Println(i.id, i.coordinates.SortedCoords())
-	// }
 
 	return all_tileset, nil
 

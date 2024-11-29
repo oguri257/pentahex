@@ -113,33 +113,17 @@ func main() {
 	tile_set = append(tile_set, tile22_rotate...)
 
 	// フラグを定義
-	opt := flag.Int("opt", 0, "option")
-	out := flag.String("out", "default", "fileout")
+	optSplit := flag.Int("optSplit", 0, "option")
+	optDup := flag.Int("optDup", 0, "option")
+	optRange := flag.Int("optRange", 100, "option")
+	out := flag.String("out", "", "fileout")
 	// フラグをパース
 	flag.Parse()
 	M, Mh := 11, 10
 
-	_, err := domain.Gen_constraint(tile_set, M, Mh, opt, out)
+	_, err := domain.Gen_constraint(tile_set, M, Mh, optSplit, optDup, optRange, out)
 	if err != nil {
 		fmt.Errorf("failed at gen_constraint")
 		return
 	}
-
-	// ファイルをクローズする
-	// defer file.Close()
-	// f, err := os.Open(file.Name())
-	// if err != nil {
-	// 	fmt.Errorf("failed to open file: %w", err)
-	// 	return
-	// }
-	// defer f.Close()
-
-	// // ファイル内容を読み取り
-	// _, err = io.Copy(os.Stdout, f)
-	// if err != nil {
-	// 	fmt.Errorf("failed to read file: %w", err)
-	// 	return
-	// }
-	// return
-
 }

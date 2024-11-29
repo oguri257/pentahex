@@ -31,6 +31,17 @@ func (s *TilePatSet) Remove(element *PrimTilePat) {
 	delete(s.elements, element)
 }
 
+func (s *TilePatSet) Duplication(otherSet *TilePatSet) []*PrimTilePat {
+	keys := make([]*PrimTilePat, 0, len(s.elements))
+	for key := range s.elements {
+		_, exists := otherSet.elements[key]
+		if exists {
+			keys = append(keys, key)
+		}
+	}
+	return keys
+}
+
 func removeByValue(slice []*PrimTilePat, value *PrimTilePat) []*PrimTilePat {
 	for i, v := range slice {
 		if v == value {

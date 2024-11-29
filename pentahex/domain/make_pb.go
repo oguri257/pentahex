@@ -10,8 +10,22 @@ import (
 )
 
 // ファイル名を生成する関数
-func genFilename(progName string, opt int) string {
-	return fmt.Sprintf("%s-opt%d", progName, opt)
+func genFilename(progName string, optSplit int, optDup int, optRange int) string {
+	return fmt.Sprintf("%s-optSplit%d-optDup%d-optRange%d", progName, optSplit, optDup, optRange)
+}
+
+// 投射変数を出力する関数
+func printPvars(writer io.Writer, pTile []*PrimTilePat, M int) error {
+	writer.Write([]byte(fmt.Sprintf("min: ")))
+	for _, ptile := range pTile {
+		tile := ptile
+		_, err := writer.Write([]byte(fmt.Sprintf("%d %s ", 1, tile.toVariales(M))))
+		if err != nil {
+			return fmt.Errorf("failed at printLinEx")
+		}
+	}
+	writer.Write([]byte(fmt.Sprintf(";\n")))
+	return nil
 }
 
 func printLinEx(writer io.Writer, tileExp []TileExp, M int) error {
@@ -22,8 +36,6 @@ func printLinEx(writer io.Writer, tileExp []TileExp, M int) error {
 		if err != nil {
 			return fmt.Errorf("failed at printLinEx")
 		}
-
-		// fmt.Printf("%d %s ", coeff, tile.toVariales(M))
 	}
 	return nil
 }
@@ -38,15 +50,9 @@ func printConstr(writer io.Writer, tileExp []TileExp, M int, Operand string, num
 		if err != nil {
 			return fmt.Errorf("failed at printConstr: %w", err)
 		}
-		// fmt.Printf("%s %d;\n", Operand, num)
 	}
 	return nil
 }
-
-// def printConstr(out, exp, M, Op, num):
-//     if exp != set():
-//         printLinEx(out, exp, M)
-//         print("{} {};".format(Op, num), file=out)
 
 func tilesToExp(tile_set []*PrimTilePat, in_coeff int) ([]TileExp, error) {
 	res := make([]TileExp, 0, len(tile_set))
@@ -60,9 +66,9 @@ func tilesToExp(tile_set []*PrimTilePat, in_coeff int) ([]TileExp, error) {
 	return res, nil
 }
 
-func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *string) (*os.File, error) {
+func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, optSplit *int, optDup *int, optRange *int, out *string) (*os.File, error) {
 
-	// fmt.Println(tile_set, M, Mh, opt, out)
+	// fmt.Println(tile_set, M, Mh, optSplit, out)
 	maxlenx, maxleny := -99, -99
 	for _, tile := range tile_set {
 		if tile.xlen > maxlenx {
@@ -85,6 +91,9 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 		}
 	}
 
+	// タイルオブジェクトの生成
+	// T[i][j]: 基本タイルを(i,j)だけ平行移動したタイルの集合
+	// H[x][y]: (x,y) を埋められるタイルの集合
 	// T と H を [][]PrimTilePat のスライスとして定義
 	T := make([][]*TilePatSet, M)
 	H := make([][]*TilePatSet, M)
@@ -132,7 +141,7 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 		}
 	}
 
-	if *opt >= 1 {
+	if *optSplit >= 0 {
 		// 不要なタイル入れを生成
 		TD := make([][]*TilePatSet, M)
 		for i := 0; i < M; i++ {
@@ -186,7 +195,7 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 	}
 
 	progName := "pentahex"
-	fileNameBase := genFilename(progName, *opt)
+	fileNameBase := genFilename(progName, *optSplit, *optDup, *optRange)
 	var pbOutStream *os.File
 	var err error
 
@@ -205,7 +214,7 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 	}
 
 	// ここで出力内容をpbOutStreamに書き込み
-	err = gen_basic_constraints(pbOutStream, M, Mh, *opt, D, T, H, tile_set)
+	err = gen_basic_constraints(pbOutStream, M, Mh, *optSplit, *optDup, *optRange, D, T, H, tile_set)
 	// 例: _, err = pbOutStream.WriteString("出力内容")
 	if err != nil {
 		fmt.Println("Error writing to file:", err)
@@ -219,27 +228,36 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 	return pbOutStream, err
 }
 
-func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]bool, T [][]*TilePatSet, H [][]*TilePatSet, tilePat []*PrimTilePat) error {
+func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, optSplit int, optDup int, optRange int, D [][]bool, T [][]*TilePatSet, H [][]*TilePatSet, tilePat []*PrimTilePat) error {
+	//左側のタイルの集合作成、投射変数指定
+	leftTileSet := NewTilePatSet()
+	if optSplit == 1 {
+		// rightTileSet := NewTilePatSet()
+		for i := 0; i < M; i++ {
+			for j := 0; j < Mh; j++ {
+				if D[i][j] {
+					for _, tile := range H[i][j].Elements() {
+						if tile.group == 1 {
+							leftTileSet.Add(tile)
+						}
+						// else {
+						// 	rightTileSet.Add(tile)
+						// }
+					}
+				}
+			}
+		}
+		//投射変数を指定して出力
+		printPvars(pbOutStream, leftTileSet.Elements(), M)
+	}
+
 	typeSet := utils.NewIntSet()
 	for _, tile := range tilePat {
 		typeSet.Add(tile.id)
 	}
 
-	// 制約の生成： 各(i,j)に対して、それを埋めるタイルは一つだけ
-	for i := 0; i < M; i++ {
-		for j := 0; j < Mh; j++ {
-			if D[i][j] {
-				tileExp, err := tilesToExp(H[i][j].Elements(), 1)
-				if err != nil {
-					fmt.Errorf("failed at tilesToExp() in gen_basic_constraints: %w", err)
-				}
-				printConstr(pbOutStream, tileExp, M, "=", 1)
-			}
-		}
-	}
-
+	//タイルの種類分け
 	peaces := make([]*TilePatSet, typeSet.Size())
-	// 各要素を NewTilePatSet で初期化
 	for i := range peaces {
 		peaces[i] = NewTilePatSet() // 各 TilePatSet を初期化
 	}
@@ -251,15 +269,53 @@ func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]b
 		}
 	}
 
+	// タイルの種類に関する制約
 	for _, p := range typeSet.Elements() {
-		tileExp, err := tilesToExp(peaces[p-1].Elements(), 1)
-		if err != nil {
-			fmt.Errorf("failed at tilesToExp in gen_basic_constraint")
+		// 全体領域で重複を許さない
+		if optDup == 0 {
+			tileExp, err := tilesToExp(peaces[p-1].Elements(), 1)
+			if err != nil {
+				fmt.Errorf("failed at tilesToExp in gen_basic_constraint")
+			}
+			printConstr(pbOutStream, tileExp, M, "=", 1)
 		}
-		printConstr(pbOutStream, tileExp, M, "=", 1)
+		// 左側領域内で重複を許さない
+		if optDup >= 1 {
+			tileExp, err := tilesToExp(peaces[p-1].Duplication(leftTileSet), 1)
+			if err != nil {
+				fmt.Errorf("failed at tilesToExp in gen_basic_constraint")
+			}
+			printConstr(pbOutStream, tileExp, M, "<=", 1)
+		}
+		// 右側領域内で重複を許さない
+		// if optDup == 2 {
+		// 	tileExp, err := tilesToExp(peaces[p-1].Duplication(rightTileSet), 1)
+		// 	if err != nil {
+		// 		fmt.Errorf("failed at tilesToExp in gen_basic_constraint")
+		// 	}
+		// 	printConstr(pbOutStream, tileExp, M, "=", 1)
+		// }
 	}
 
-	if opt >= 2 {
+	// 制約の生成： 各(i,j)に対して、それを埋めるタイルは一つだけ
+	// optRange：optionでもらうのはx,yの合計値、合計値以下のマスを必ず埋めるように制約を生成する、デフォルトは全てを埋める
+	for i := 0; i < M; i++ {
+		for j := 0; j < Mh; j++ {
+			if D[i][j] {
+				if i+j >= optRange {
+					continue
+				}
+				tileExp, err := tilesToExp(H[i][j].Elements(), 1)
+				if err != nil {
+					fmt.Errorf("failed at tilesToExp() in gen_basic_constraints: %w", err)
+				}
+				printConstr(pbOutStream, tileExp, M, "=", 1)
+			}
+		}
+	}
+
+	//タイルを二つ置いたときに埋められないスペースができるならばそれらを禁止する制約
+	if optSplit > 4 {
 		for i := 0; i < M; i++ {
 			for j := 0; j < Mh; j++ {
 				for _, tile := range T[i][j].Elements() {
@@ -314,6 +370,7 @@ func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]b
 			}
 		}
 	}
+
 	return nil
 }
 
