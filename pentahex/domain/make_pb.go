@@ -107,20 +107,6 @@ func Gen_constraint(tile_set []*PrimTilePat, M int, Mh int, opt *int, out *strin
 					move_tile.Add(newcoord)
 				}
 
-				// もし patType が 11 で、x >= 1 のセルが 3 つ以上ある場合は continue
-				if pat.id == 11 {
-
-					count := 0
-					for _, cell := range move_tile.Elements_type() {
-						if cell.X >= 1 {
-							count++
-						}
-					}
-					if count >= 3 {
-						continue // ここで次のループにスキップ、もしくは処理を中断
-					}
-				}
-
 				// タイルがカバーするマスがすべて許可領域ならば
 				// 使用可能なタイルとして登録
 				flag := true
@@ -264,9 +250,7 @@ func gen_basic_constraints(pbOutStream *os.File, M int, Mh int, opt int, D [][]b
 			}
 		}
 	}
-	for _, a := range peaces[10].Elements() {
-		fmt.Println(a.coordinates.SortedCoords())
-	}
+
 	for _, p := range typeSet.Elements() {
 		tileExp, err := tilesToExp(peaces[p-1].Elements(), 1)
 		if err != nil {

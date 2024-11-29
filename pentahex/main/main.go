@@ -117,7 +117,7 @@ func main() {
 	out := flag.String("out", "default", "fileout")
 	// フラグをパース
 	flag.Parse()
-	M, Mh := 10, 11
+	M, Mh := 11, 10
 
 	_, err := domain.Gen_constraint(tile_set, M, Mh, opt, out)
 	if err != nil {

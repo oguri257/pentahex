@@ -18,6 +18,7 @@ type PrimTilePat struct {
 	xlen        int
 	ylen        int
 	borders     utils.CellSet
+	group       int
 }
 
 func NewPrimTilePat(newid int, coordinates utils.CellSet) (*PrimTilePat, error) {
@@ -33,22 +34,32 @@ func NewPrimTilePat(newid int, coordinates utils.CellSet) (*PrimTilePat, error) 
 	min := -100
 	xmin, ymin := inf, inf
 	xmax, ymax := min, min
+	left_count := 0
 	for _, coord := range coordinates.Elements() {
-		if coord.X < xmin {
-			xmin = coord.X
+		x, y := coord.X, coord.Y
+		if x < xmin {
+			xmin = x
 		}
-		if coord.Y < ymin {
-			ymin = coord.Y
+		if y < ymin {
+			ymin = y
 		}
-		if coord.X > xmax {
-			xmax = coord.X
+		if x > xmax {
+			xmax = x
 		}
-		if coord.Y > ymax {
-			ymax = coord.Y
+		if y > ymax {
+			ymax = y
+		}
+		if x+y < 10 {
+			left_count++
 		}
 	}
 	xlen := xmax - xmin + 1
 	ylen := ymax - ymin + 1
+	// 自身の5マスに左側が3マス以上あればgroup1,そうでなければgroup2に分類する
+	group := 1
+	if left_count < 3 {
+		group = 2
+	}
 
 	borders := utils.NewCellSet()
 	for _, coord := range coordinates.Elements() {
@@ -79,6 +90,7 @@ func NewPrimTilePat(newid int, coordinates utils.CellSet) (*PrimTilePat, error) 
 		xlen:        xlen,
 		ylen:        ylen,
 		borders:     *borders,
+		group:       group,
 	}, nil
 }
 
